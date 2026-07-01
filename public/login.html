@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk — NexaNime</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="aurora"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="assets/logo.svg" alt="NexaNime logo">
+        <span class="brand-name">NexaNime</span>
+        <span class="tagline">Masuk untuk mulai nonton</span>
+      </div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">Nama pengguna</label>
+          <input type="text" id="username" placeholder="mis. otaku_id" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="password">Kata sandi</label>
+          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn">Masuk ke NexaNime</button>
+      </form>
+
+      <p class="login-hint">Ini mode demo — sesi login disimpan di perangkatmu saja.<br>Isi apa saja untuk masuk.</p>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    // Jika sudah login, langsung lempar ke home
+    if (Auth.getUser()) window.location.href = 'index.html';
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim() || 'Guest';
+      Auth.login(username);
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

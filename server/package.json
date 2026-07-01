@@ -1,0 +1,15 @@
+{
+  "name": "nexanime-server",
+  "version": "1.0.0",
+  "description": "Backend API NexaNime - membungkus scraper alqanime jadi REST API + serve frontend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "express": "^4.21.0"
+  }
+}

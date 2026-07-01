@@ -1,0 +1,36 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NexaNime">
+  <defs>
+    <linearGradient id="nx-grad" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7dd3fc"/>
+      <stop offset="0.5" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <radialGradient id="nx-core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#e0f2fe"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </radialGradient>
+    <filter id="nx-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2.4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Hexagon frame -->
+  <path d="M32 3 L58 17.5 V46.5 L32 61 L6 46.5 V17.5 Z"
+        stroke="url(#nx-grad)" stroke-width="2.2" fill="rgba(59,130,246,0.06)" filter="url(#nx-glow)"/>
+
+  <!-- Orbit ring -->
+  <ellipse cx="32" cy="32" rx="21" ry="9" transform="rotate(-28 32 32)"
+           stroke="#60a5fa" stroke-width="1.1" fill="none" opacity="0.55"/>
+
+  <!-- Angular N mark -->
+  <path d="M22 44 V20 L42 44 V20"
+        stroke="url(#nx-grad)" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"
+        fill="none" filter="url(#nx-glow)"/>
+
+  <!-- Orbit core / play-node -->
+  <circle cx="42" cy="20" r="3.4" fill="url(#nx-core)" filter="url(#nx-glow)"/>
+</svg>

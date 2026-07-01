@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detail Anime — NexaNime</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="aurora"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="app">
+    <nav class="navbar">
+      <a href="index.html#/home" class="brand">
+        <img src="assets/logo.svg" alt="NexaNime logo">
+        <span class="brand-name">NexaNime</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html#/home">Home</a>
+        <a href="index.html#/popular">Populer</a>
+        <a href="index.html#/jadwal">Jadwal</a>
+        <a href="index.html#/genre">Genre</a>
+        <a href="index.html#/daftar">Cari &amp; Filter</a>
+      </div>
+      <div class="nav-user" style="margin-left:auto">
+        <div class="avatar" data-initials>?</div>
+        <span data-username>Guest</span>
+        <button class="icon-btn" id="logoutBtn" title="Keluar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <main id="detailRoot">
+      <section class="detail-hero">
+        <div class="detail-poster skeleton"></div>
+        <div class="detail-body">
+          <div class="skeleton" style="width:60%;height:34px;border-radius:8px;margin-bottom:14px"></div>
+          <div class="skeleton" style="width:40%;height:16px;border-radius:8px;margin-bottom:24px"></div>
+          <div class="skeleton" style="width:90%;height:80px;border-radius:8px"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>NexaNime · Data disediakan lewat scraping publik (alqanime.net) oleh <a href="https://qrtzcode.my.id/docs/anime/alqanime" style="color:var(--blue-300)">qrtzcode / rynaqrtz</a>.</footer>
+  </div>
+
+  <!-- Player modal: memutar link yang mendukung embed (PixelDrain) tanpa pindah situs -->
+  <div class="player-modal" id="playerModal">
+    <div class="player-modal-backdrop" id="playerBackdrop"></div>
+    <div class="player-modal-box">
+      <div class="player-modal-head">
+        <span id="playerTitle">Memutar...</span>
+        <button class="icon-btn" id="playerClose" title="Tutup">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="player-modal-frame">
+        <iframe id="playerFrame" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      </div>
+      <p class="player-modal-note">Diputar langsung dari PixelDrain di dalam NexaNime. Kalau video tidak muncul, gunakan tombol "Buka di tab baru" di bawah.</p>
+      <a class="btn ghost" id="playerOpenNewTab" href="#" target="_blank" rel="noopener noreferrer" style="width:100%;text-align:center;display:block;margin-top:4px">Buka di tab baru</a>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    Auth.requireAuth();
+    const user = Auth.getUser();
+    if (user) {
+      document.querySelectorAll('[data-username]').forEach((el) => (el.textContent = user.username));
+      document.querySelectorAll('[data-initials]').forEach((el) => (el.textContent = Auth.initials(user.username)));
+    }
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      Auth.logout();
+      window.location.href = 'login.html';
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug') || params.get('url');
+    const root = document.getElementById('detailRoot');
+
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    async function loadDetail() {
+      if (!slug) {
+        root.innerHTML = '<div class="empty-state"><div class="glyph">⚠</div><h3>Anime tidak ditemukan</h3><p>Parameter slug kosong.</p></div>';
+        return;
+      }
+      try {
+        const res = await Api.detail(slug);
+        const d = res.data;
+        document.title = `${d.title} — NexaNime`;
+
+        const infoRows = Object.entries(d.info || {})
+          .map(([k, v]) => `<div><b>${escapeHTML(k)}:</b> ${escapeHTML(v)}</div>`)
+          .join('');
+
+        const genreTags = (d.genres || []).map((g) => `<span>${escapeHTML(g)}</span>`).join('');
+
+        const episodesHTML = (d.episodes || [])
+          .map((ep, i) => `
+            <div class="episode-item" data-idx="${i}">
+              <div class="episode-head">
+                <span>${escapeHTML(ep.title || `Episode ${i + 1}`)}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div class="episode-body">
+                ${(ep.resolutions || [])
+                  .map(
+                    (r) => `
+                  <div class="reso-row">
+                    <div class="res-label">${escapeHTML(r.resolution || 'Link')}</div>
+                    <div class="link-row">
+                      ${(r.links || [])
+                        .map((l) => {
+                          const isPixeldrain = /pixeldrain\.com/i.test(l.url);
+                          if (isPixeldrain) {
+                            return `<a href="#" class="play-link" data-url="${escapeHTML(l.url)}" data-title="${escapeHTML(d.title)} — ${escapeHTML(ep.title || '')}">▶ Putar (${escapeHTML(l.label || 'PixelDrain')})</a>`;
+                          }
+                          return `<a href="${l.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(l.label || 'Unduh')}</a>`;
+                        })
+                        .join('')}
+                    </div>
+                  </div>`
+                  )
+                  .join('') || '<div class="reso-row"><span style="color:var(--text-low);font-size:12px">Tidak ada link tersedia.</span></div>'}
+              </div>
+            </div>`)
+          .join('');
+
+        root.innerHTML = `
+          <section class="detail-hero">
+            <div class="detail-poster"><img src="${d.thumbnail}" alt="${escapeHTML(d.title)}" onerror="this.style.opacity=0"></div>
+            <div class="detail-body">
+              <h1>${escapeHTML(d.title)}</h1>
+              <div class="detail-meta">${genreTags}</div>
+              <p class="detail-synopsis">${escapeHTML(d.sinopsis) || 'Sinopsis belum tersedia.'}</p>
+              <div class="info-table">${infoRows}</div>
+            </div>
+          </section>
+          <section class="section">
+            <div class="section-head"><h2><span class="bar"></span>Daftar Episode</h2></div>
+            <div class="episode-list">${episodesHTML || '<div class="empty-state"><div class="glyph">◈</div><h3>Belum ada episode</h3></div>'}</div>
+          </section>`;
+
+        root.querySelectorAll('.episode-item').forEach((item) => {
+          item.querySelector('.episode-head').addEventListener('click', () => {
+            item.classList.toggle('open');
+          });
+        });
+
+        root.querySelectorAll('.play-link').forEach((link) => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            openPlayer(link.dataset.url, link.dataset.title);
+          });
+        });
+      } catch (e) {
+        root.innerHTML = `<div class="empty-state"><div class="glyph">⚠</div><h3>Gagal memuat detail</h3><p>${escapeHTML(e.message)}</p></div>`;
+      }
+    }
+
+    // ---------------- Player modal (PixelDrain embed) ----------------
+    function toPixeldrainEmbed(url) {
+      // https://pixeldrain.com/u/<id>  ->  https://pixeldrain.com/api/filesystem/<id>?embed
+      const match = url.match(/pixeldrain\.com\/u\/([a-zA-Z0-9]+)/);
+      if (match) return `https://pixeldrain.com/api/filesystem/${match[1]}?embed`;
+      return url;
+    }
+
+    const playerModal = document.getElementById('playerModal');
+    const playerFrame = document.getElementById('playerFrame');
+    const playerTitle = document.getElementById('playerTitle');
+    const playerOpenNewTab = document.getElementById('playerOpenNewTab');
+
+    function openPlayer(url, title) {
+      playerFrame.src = toPixeldrainEmbed(url);
+      playerTitle.textContent = title || 'Memutar...';
+      playerOpenNewTab.href = url;
+      playerModal.classList.add('show');
+    }
+    function closePlayer() {
+      playerModal.classList.remove('show');
+      playerFrame.src = '';
+    }
+    document.getElementById('playerClose').addEventListener('click', closePlayer);
+    document.getElementById('playerBackdrop').addEventListener('click', closePlayer);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePlayer();
+    });
+
+    loadDetail();
+  </script>
+</body>
+</html>
