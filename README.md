@@ -1,10 +1,6 @@
 # NexaNime
 
-Website streaming/info anime dengan tema **dark blue glow**, dibangun di atas
-scraper `alqanime.js` yang kamu berikan (creator asli: `rynaqrtz`, sumber:
-qrtzcode.my.id/docs/anime/alqanime).
-
-> Catatan penting soal "API": link yang kamu kirim (`/docs/anime/alqanime` dan
+> Catatan penting soal "API": (`/docs/anime/alqanime` dan
 > `/api/embed/anime/alqanime`) itu isinya halaman dokumentasi + iframe embed,
 > **bukan** endpoint JSON yang bisa dipanggil langsung dari browser. Yang
 > benar-benar berfungsi sebagai "API" adalah script Node.js (`alqanime.js`)
